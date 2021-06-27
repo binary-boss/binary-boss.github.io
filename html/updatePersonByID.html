@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Update Person By ID</title>
+  <link rel="stylesheet" href="../css/personStyle.css">
+</head>
+
+<body>
+    <h1>Update Person By ID</h1>
+    <form id = "updatePersonByIDform">
+        <p>
+            <label>Person ID: </label>
+            <input type="text" id="personID" name="personID" placeholder="5">
+        </p>
+        <p>
+            <label>Fill all details to update the person -></label>
+        </p>
+        <p>
+            <label>Name: </label>
+            <input type="text" id="personName" name="personName" placeholder="John">
+        </p>
+        <p>
+            <label>Owner ID: </label>
+            <input type="text" id="ownerID" name="ownerID" placeholder="12408244">
+        </p>
+        <p>
+            <label>Organisation ID: </label>
+            <input type="text" id="orgID" name="orgID" placeholder="3">
+        </p>
+        <p>
+            <label>Email: </label>
+            <input type="text" id="emailID" name="emailID" placeholder="abc@xyz.com">
+        </p>
+        <p>
+            <label>Phone: </label>
+            <input type="text" id="phoneNo" name="phoneNo" placeholder="999999999">
+        </p>
+        <p>
+            <label>Visible To: </label>
+            <input type="text" id="visibleTo" name="visibleTo" placeholder="1 or 3">
+        </p>
+        <p>
+            <button type="submit">Submit</button>
+        </p>
+    </form>
+    <table class="table-bordered" id="mytable">
+        <thead>
+            <th colspan="2" class="text-center">Person Data:</th>
+        </thead>
+        <tbody id="result" class="text-center"></tbody>
+    </table>
+  <script src="../js/personScript.js"></script>
+  <script>
+    document.getElementById('updatePersonByIDform').addEventListener('submit', submitPersonUpdateForm);
+  </script>
+</body>
+</html>

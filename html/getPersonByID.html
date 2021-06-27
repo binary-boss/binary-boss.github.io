@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Get Person By ID</title>
+  <link rel="stylesheet" href="../css/personStyle.css">
+</head>
+
+<body>
+    <h1>Get Person By ID</h1>
+    <form id = "getPersonByIDform">
+        <p>
+            <label for="">Person ID: </label>
+            <input type="text" id="personID" name="personID" placeholder="5">
+        </p>
+        <p>
+            <button type="submit">Submit</button>
+        </p>
+    </form>
+    <table class="table-bordered" id="mytable">
+        <thead>
+            <th colspan="2" class="text-center">Person Data:</th>
+        </thead>
+        <tbody id="result" class="text-center"></tbody>
+    </table>
+  <script src="../js/personScript.js"></script>
+  <script>
+    document.getElementById('getPersonByIDform').addEventListener('submit', submitGetPersonByIDForm);
+  </script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Add Note To Person By ID</title>
+  <link rel="stylesheet" href="../css/personStyle.css">
+</head>
+
+<body>
+    <h1>Add Note to Person By ID</h1>
+    <form id = "addNoteToPersonByIDform">
+        <p>
+            <label for="">Person ID: </label>
+            <input type="text" id="personID" name="personID" placeholder="5">
+        </p>
+        <p>
+            <label>Note: </label>
+            <textarea name="message" rows="5" id="message"></textarea>
+        </p>
+        <p>
+            <button type="submit">Submit</button>
+        </p>
+    </form>
+    <table class="table-bordered" id="mytable">
+        <thead>
+            <th colspan="2" class="text-center">Person Data:</th>
+        </thead>
+        <tbody id="result" class="text-center"></tbody>
+    </table>
+  <script src="../js/personScript.js"></script>
+  <script>
+    document.getElementById('addNoteToPersonByIDform').addEventListener('submit', submitAddNoteToPersonForm);
+  </script>
+</body>
+</html>

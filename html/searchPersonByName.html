@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Search Person By Name</title>
+  <link rel="stylesheet" href="../css/personStyle.css">
+</head>
+
+<body>
+    <h1>Serach Persons By Name</h1>
+    <form id = "searchPersonByNameForm">
+        <p>
+          <label for="">Name: </label>
+          <input type="text" id="term" name="term" placeholder="john">
+        </p>
+        <p>
+          <button type="submit">Submit</button>
+        </p>
+    </form>
+    <table class="table-bordered" id="mytable">
+        <thead>
+            <th colspan="2" class="text-center">Matching Persons Data:</th>
+        </thead>
+        <tbody id="result" class="text-center"></tbody>
+    </table>
+  <script src="../js/personScript.js"></script>
+  <script>
+    document.getElementById('searchPersonByNameForm').addEventListener('submit', submitSearchPersonByNameForm);
+  </script>
+</body>
+</html>
