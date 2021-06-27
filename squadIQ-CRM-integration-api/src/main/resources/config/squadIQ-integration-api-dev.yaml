@@ -1,0 +1,14 @@
+mule:
+  autodiscoveryID: "17006143"
+
+pipedrive:
+  host: "squadiq-sandbox.pipedrive.com"
+  authorizationHost: "oauth.pipedrive.com"
+  authorization: "![]"
+  apiKey: "![KZUiS2l4B2ooc/dENRIqUCQIF2JJRq8lRyz3RWuguMh/lHTZHnIB9eGaPH/X/Se5]"
+  basepath: "/api"
+  path:
+    auth: "/oauth/token"
+    personByID: "/v1/persons"
+    searchPerson: "/v1/persons/search"
+  timeout: "30000"

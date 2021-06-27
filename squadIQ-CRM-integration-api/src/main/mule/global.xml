@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:request-config name="Pipedrive_Request_configuration" doc:name="HTTP Request configuration" doc:id="c252869e-fcfb-49dc-9454-5aafabd9a045" responseTimeout="${secure::pipedrive.timeout}" basePath="${secure::pipedrive.basepath}">
+		<http:request-connection protocol="HTTPS" host="${secure::pipedrive.host}" >
+			<reconnection >
+				<reconnect />
+			</reconnection>
+		</http:request-connection>
+	</http:request-config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="0121054c-5953-4ab7-9f9a-40fbd40d24d6" >
+		<http:listener-connection host="0.0.0.0" port="${https.port}" protocol="HTTPS">
+			<tls:context >
+				<tls:key-store type="jks" path="sender-keystore.jks" alias="mule-sender" keyPassword="mulesoft" password="mulesoft"/>
+			</tls:context>
+		</http:listener-connection>
+	</http:listener-config>
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="b9db58d2-0b01-4e00-a00b-02fd3b614a50" file="config\squadIQ-integration-api-${mule.env}.yaml" key="${mule.key}" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+	<api-gateway:autodiscovery apiId="${secure::mule.autodiscoveryID}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="256aad11-16b9-4851-9d1c-6e10782ac177" flowRef="squadiq-integration-api-main" />
+	<http:request-config name="Pipedrive_Auth_configuration" doc:name="HTTP Request configuration" doc:id="64be88aa-c188-4572-882f-f822d48ee5df" >
+		<http:request-connection host="${secure::pipedrive.authorizationHost}" protocol="HTTPS">
+			<reconnection >
+				<reconnect />
+			</reconnection>
+		</http:request-connection>
+	</http:request-config>
+	<!--<sub-flow name="get-pipedrive-token" doc:id="ef0db630-0885-4210-89a3-04ee09233ef7" >
+		<logger level="INFO" doc:name="Log Flow Entry" doc:id="b618060e-669f-4621-9b21-18e1ec7ab2c1" message="#['Entered flow: ' ++ flow.name]" />
+		<ee:cache doc:name="Cache adp access token" doc:id="d4947373-f9e1-4a18-bade-2b88372bf488" cachingStrategy-ref="TokenCachingStrategy" >
+			<logger level="INFO" doc:name="Log fetching new token" doc:id="f5b5248d-56f4-4baf-ba43-9fbb979bf52e" message="Fetching New Token" />
+			<http:request method="POST" doc:name="Post Pipedrive Token Request" doc:id="5453bb16-1de2-4fd1-a46d-520f9eb5e807" config-ref="Pipedrive_Auth_configuration" path="${secure::pipedrive.path.auth}" >
+				<http:headers ><![CDATA[#[output application/java
+-&#45;&#45;
+{
+	"Authorization" : Mule::p('secure::pipedrive.authorization')
+}]]]></http:headers>
+				<http:query-params ><![CDATA[#[output application/java
+-&#45;&#45;
+{
+	"grant_type" : "client_credentials"
+}]]]></http:query-params>
+			</http:request>
+		</ee:cache>
+		<ee:transform doc:name="Return Pipedrive Token" doc:id="217b889d-111a-432f-a2e3-00f508c91fb2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+-&#45;&#45;
+payload.token_type ++ " " ++ payload.access_token]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Log Flow Exit" doc:id="2220fed4-70a2-451a-b995-036c36c2a2e4" message="#['Flow completed: ' ++ flow.name]" />
+	</sub-flow>	-->
+
+</mule>

@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd  http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+    <apikit:config name="squadiq-integration-api-config" api="resource::ff78a4f8-b9d7-416f-bbdf-b39304d50405:pipedrive-squadiq-integration-api:1.0.2:raml:zip:squadiq-integration-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <flow name="squadiq-integration-api-main">
+        <http:listener config-ref="HTTP_Listener_config" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="squadiq-integration-api-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="patch:\pipedrive\person\(id):application\json:squadiq-integration-api-config">
+        <ee:transform doc:name="Set personID" doc:id="4a93d11a-c73b-4f3b-9c08-c01f6e020f34">
+			<ee:variables>
+				<ee:set-variable variableName="personID"><![CDATA[(attributes.uriParams.'id' as Number) default ""]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+"Person -> Bob updated successfully."]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\pipedrive\person\notification:squadiq-integration-api-config">
+        <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  v: 1,
+  matches_filters: {
+    current: []
+  },
+  meta: {
+    action: "added",
+    change_source: "app",
+    company_id: 8083576,
+    host: "squadiq-sandbox.pipedrive.com",
+    id: 1,
+    is_bulk_update: false,
+    matches_filters: {
+      current: []
+    },
+    object: "person",
+    permitted_user_ids: [
+      12408244
+    ],
+    pipedrive_service_name: false,
+    timestamp: 1624688318,
+    timestamp_micro: 1624688318875745,
+    trans_pending: false,
+    user_id: 12408244,
+    v: 1,
+    webhook_id: "679756"
+  },
+  current: {
+    related_closed_deals_count: 0,
+    email_messages_count: 0,
+    cc_email: "squadiq-sandbox@pipedrivemail.com",
+    owner_id: 12408244,
+    open_deals_count: 0,
+    last_outgoing_mail_time: null,
+    active_flag: true,
+    picture_id: null,
+    last_activity_id: null,
+    next_activity_date: null,
+    update_time: "2021-06-26 06:18:38",
+    participant_open_deals_count: 0,
+    activities_count: 0,
+    id: 1,
+    org_name: "Pigeon Trainers",
+    first_name: "John",
+    email: [
+      {
+        label: "work",
+        value: "qwerty@gmail.com",
+        primary: true
+      }
+    ],
+    won_deals_count: 0,
+    owner_name: "Aditya Singh",
+    files_count: 0,
+    company_id: 8083576,
+    related_won_deals_count: 0,
+    last_incoming_mail_time: null,
+    first_char: "j",
+    undone_activities_count: 0,
+    closed_deals_count: 0,
+    last_name: "Doe",
+    last_activity_date: null,
+    label: 5,
+    next_activity_id: null,
+    related_lost_deals_count: 0,
+    related_open_deals_count: 0,
+    phone: [
+      {
+        label: "work",
+        value: "11111111",
+        primary: true
+      }
+    ],
+    visible_to: "3",
+    org_id: 1,
+    notes_count: 0,
+    followers_count: 0,
+    name: "John Doe",
+    participant_closed_deals_count: 0,
+    lost_deals_count: 0,
+    next_activity_time: null,
+    add_time: "2021-06-26 06:18:38",
+    done_activities_count: 0
+  },
+  previous: null,
+  event: "added.person",
+  retry: 0
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\pipedrive\person\(id):squadiq-integration-api-config">
+        <ee:transform doc:name="Set personID">
+            <ee:variables>
+                <ee:set-variable variableName="personID"><![CDATA[(attributes.uriParams.'id' as Number) default ""]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <flow-ref doc:name="get-person-by-ID-flow" doc:id="964fd4cc-7f52-492c-9965-f65342c63bb2" name="get-person-by-ID-flow" />
+        <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  id: 2,
+  firstName: "John",
+  lastName: "Cena",
+  name: "John Cena",
+  email: "asdf@gmail.com",
+  phone_no: "77777777",
+  org_name: "wwe",
+  org_id: 2,
+  event: "added",
+  won_deals_count: 0,
+  related_won_deals_count: 0,
+  related_closed_deals_count: 0,
+  related_lost_deals_count: 0,
+  related_open_deals_count: 0,
+  notes_count: 0,
+  followers_count: 0,
+  participant_closed_deals_count: 0,
+  lost_deals_count: 0
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="post:\pipedrive\person\(id)\addNote:application\json:squadiq-integration-api-config">
+        <ee:transform doc:name="Set personID" doc:id="a6e96d13-72b5-4143-8256-6dcde0b772cd">
+			<ee:variables>
+				<ee:set-variable variableName="personID"><![CDATA[(attributes.uriParams.'id' as Number) default ""]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+        <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+"Note added for Person -> Bob successfully."]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+</mule>

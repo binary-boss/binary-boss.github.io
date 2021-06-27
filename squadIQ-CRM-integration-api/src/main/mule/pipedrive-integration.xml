@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<http:request-config name="Notification_Request_configuration" doc:name="HTTP Request configuration" doc:id="9729bf2d-f761-45df-8140-d1a4f811a2b0" basePath="/token/feee9827-920d-422f-aa8a-8be0df121cd4" >
+		<http:request-connection protocol="HTTPS" host="webhook.site" />
+	</http:request-config>
+	<os:config name="ObjectStore_Config" doc:name="ObjectStore Config" doc:id="ff28e84f-3a16-4a49-83e7-7b7a2b0cce32" />
+	<os:object-store name="request_uuid_store" doc:name="Object store" doc:id="e79aa9b9-8590-4a5a-b1be-a56cc20090a4" config-ref="ObjectStore_Config" />
+	<flow name="get-person-by-ID-flow" doc:id="695eb941-d481-48bc-9e11-5e4786b0a248" >
+		<logger level="INFO" doc:name="Log flow entry" doc:id="8111313a-df05-4551-a6b1-0cab89176856" message="Getting person details with ID : #[vars.personID] from Pipedrive."/>
+		<http:request method="GET" doc:name="GET /person by ID" doc:id="f053032a-93f5-4a64-b9ca-8e846bc1b9ee" config-ref="Pipedrive_Request_configuration" path="${secure::pipedrive.path.personByID}/{id}">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Authorization" : "Bearer 8083576:12408244:f36b49bf8c4c96dcd5b8cab6f6175e6cdea84f58"
+}]]]></http:headers>
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"id" : vars.personID
+}]]]></http:uri-params>
+		</http:request>
+		<set-variable value="#[payload.data]" doc:name="Set Variable" doc:id="ab4e693e-4abe-439e-9259-59958a2f2a20" variableName="userData"/>
+		<ee:transform doc:name="Map Response" doc:id="bfcefaa9-74b8-4336-81d2-957285fc24e1" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  id: vars.userData.id,
+  firstName: vars.userData.first_name,
+  lastName: vars.userData.last_name,
+  name: vars.userData.name,
+  email: vars.userData.email,
+  phone: vars.userData.phone,
+  org_name: vars.userData.org_name,
+  org_id: vars.userData.org_id.value,
+  won_deals_count: vars.userData.won_deals_count,
+  related_won_deals_count: vars.userData.related_won_deals_count,
+  related_closed_deals_count: vars.userData.related_closed_deals_count,
+  related_lost_deals_count: vars.userData.related_lost_deals_count,
+  related_open_deals_count: vars.userData.related_open_deals_count,
+  notes_count: vars.userData.notes_count,
+  followers_count: vars.userData.followers_count,
+  participant_closed_deals_count: vars.userData.participant_closed_deals_count,
+  lost_deals_count: vars.userData.lost_deals_count
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Log flow exit" doc:id="2d36fec8-31d7-4db8-9f97-3425bf5b305e" message="Got person details with ID : #[vars.personID] from Pipedrive."/>
+	</flow>
+	<flow name="get-person-from-add-notification" doc:id="e7c2fcb4-b8c1-487b-8002-baaab84f2f0b" >
+		<scheduler doc:name="Scheduler" doc:id="08219029-a0e2-4535-a114-cabf0346c464" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="10000"/>
+			</scheduling-strategy>
+		</scheduler>
+		<logger level="INFO" doc:name="Log flow entry" doc:id="b1665f32-93aa-4131-ba47-458b6fcde9c7" message="Getting newly added persons from Pipedrive." />
+		<http:request method="GET" doc:name="GET /addNotification" doc:id="47755e32-9259-4622-aad1-0a65a8a4cdba" config-ref="Notification_Request_configuration" path="/request/latest" >
+		</http:request>
+		<flow-ref doc:name="process-notification-sub-flow" doc:id="fdeeed46-7271-4c80-b401-7d21eeb7b134" name="process-notification-sub-flow" />
+	</flow>
+	<flow name="get-person-from-update-notification" doc:id="a8d91762-9e45-414f-8ba0-0630f60207cf" >
+		<scheduler doc:name="Scheduler" doc:id="9723c249-8e3e-4a80-a0ea-80c75b2ea3c9" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="10000" />
+			</scheduling-strategy>
+		</scheduler>
+		<logger level="INFO" doc:name="Log flow entry" doc:id="a5306c0e-35e7-4b73-bbff-8b7d5c21acef" message="Getting newly updated persons from Pipedrive." />
+		<http:request method="GET" doc:name="GET /updateNotification" doc:id="e8a4e992-a9b7-48c9-8b54-101a03c9ff50" config-ref="Notification_Request_configuration" path="/request/latest" />
+		<flow-ref doc:name="process-notification-sub-flow" doc:id="cfd329bc-d4bc-48df-ad0b-9449661b9b89" name="process-notification-sub-flow"/>
+	</flow>
+	<sub-flow name="process-notification-sub-flow" doc:id="a28095fc-7606-40ef-be81-d16f77c2edea" >
+		<set-variable value="#[payload.uuid]" doc:name="Set request ID" doc:id="870bac8c-2290-4c99-8312-d070a58b8278" variableName="requestID" />
+		<os:retrieve doc:name="Retrieve UUID from Request store" doc:id="3ea8d47a-d870-40ea-851b-28ec79526064" key="uuid" objectStore="request_uuid_store" target="uuid" >
+			<os:default-value ><![CDATA[0]]></os:default-value>
+		</os:retrieve>
+		<choice doc:name="Check if request has been processed already" doc:id="dabf4b3b-9856-4994-b764-52889798c542" >
+			<when expression='#[vars.requestID != vars.uuid and payload.user_agent=="Pipedrive Webhooks"]' >
+				<set-variable value="#[read(payload.content,'application/json')]" doc:name="Set person data variable" doc:id="06f9beb8-64bf-4d34-9b86-08e53bef9b69" variableName="userData" />
+				<ee:transform doc:name="Map Response" doc:id="e728bce0-ba1e-4af8-9bf8-6b48aa89c1b5" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  id: vars.userData.current.id,
+  firstName: vars.userData.current.first_name,
+  lastName: vars.userData.current.last_name,
+  name: vars.userData.current.name,
+  email: vars.userData.current.email,
+  phone: vars.userData.current.phone,
+  event: vars.userData.meta.action,
+  org_name: vars.userData.current.org_name,
+  org_id: vars.userData.current.org_id.value,
+  won_deals_count: vars.userData.current.won_deals_count,
+  related_won_deals_count: vars.userData.current.related_won_deals_count,
+  related_closed_deals_count: vars.userData.current.related_closed_deals_count,
+  related_lost_deals_count: vars.userData.current.related_lost_deals_count,
+  related_open_deals_count: vars.userData.current.related_open_deals_count,
+  notes_count: vars.userData.current.notes_count,
+  followers_count: vars.userData.current.followers_count,
+  participant_closed_deals_count: vars.userData.current.participant_closed_deals_count,
+  lost_deals_count: vars.userData.current.lost_deals_count
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<logger level="INFO" doc:name="Log person data" doc:id="6c5a88ba-2a6d-4c3e-b068-eb758a87808d" message="#[payload]" />
+				<logger level="INFO" doc:name="Log Message" doc:id="cdc1fa18-a7e7-4476-91c5-c2eb7d042d37" message='#["Person ID: " ++ payload.id ++ " Name: " ++ payload.name ++ " has been " ++ payload.event ++ " in Pipedrive."]' />
+				<os:store doc:name="Store request ID" doc:id="d7a0f2c5-1f63-4d9b-a15c-77eccf78c51c" key="uuid" objectStore="request_uuid_store" >
+					<os:value ><![CDATA[#[vars.requestID]]]></os:value>
+				</os:store>
+				<remove-variable doc:name="Remove person data variable" doc:id="e0abd44a-165f-4243-9e6f-6353325a608e" variableName="userData" />
+				<remove-variable doc:name="Remove request ID variable" doc:id="3f2869f8-5711-4777-8ad4-6b9b9e1848f8" variableName="requestID" />
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Log flow exit" doc:id="69842eee-2986-419c-8bdb-7a9a274c42d0" message="Waiting for new requests" />
+			</otherwise>
+		</choice>
+	</sub-flow>
+</mule>
