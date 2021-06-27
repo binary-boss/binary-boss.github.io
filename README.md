@@ -1,7 +1,8 @@
 # Pipedrive Integration
 
-Using a Web App, the following tasks were implemented ->  
-Link -> https://binary-boss.github.io/
+Using a Web App, the tasks 1, 3 and 4 were implemented ->  
+Link -> https://binary-boss.github.io/ 
+
 API calls have been done in the common personScripts.js
 ## Task 1:  
 - Search "Person" on Pipedrive given name or ID.  
