@@ -1,5 +1,5 @@
 
-const apiToken = "1f9148c0bfef466182c0de24aa6c6dbcf4dadcb5";
+const apiToken = "YOUR_API_TOKEN_HERE";
 const companyDomain = "squadiq-sandbox";
 
 function mapPersonResponse(myJson){
